@@ -9,6 +9,11 @@ from .base import Base
 import nrepl
 
 def parse_list(l_s):
+    """
+    Parses a clojure list in the form '("foo" "bar" "baz")' into
+    a Python array, like ["foo", "bar", "baz"]. This function is
+    very crude.
+    """
     return l_s[1:-1].replace('"', '').split(" ")
 
 class Source(Base):
