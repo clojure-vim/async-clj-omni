@@ -1,0 +1,3 @@
+[submodule "rplugin/python3/deoplete/sources/nrepl-python-client"]
+	path = rplugin/python3/deoplete/sources/nrepl_python_client
+	url = https://github.com/cemerick/nrepl-python-client.git
