@@ -16,6 +16,9 @@ def parse_list(l_s):
     """
     return l_s[1:-1].replace('"', '').split(" ")
 
+def debug_msg(vim, msg):
+    vim.current.buffer.append("{}".format(msg))
+
 class Source(Base):
     def __init__(self, vim):
         Base.__init__(self, vim)
@@ -23,11 +26,23 @@ class Source(Base):
         self.mark = 'CLJ'
 
     def gather_candidates(self, context):
-        self.__conn__ = nrepl.connect("nrepl://localhost:39663")
-        self.__conn__.write({"op": "eval", "code": "(map (comp name first) (ns-publics 'clojure.core))"})
-        sys.stdout.write('fooooo')
-        candidates_str = self.__conn__.read()['value']
+        client = False
+        try:
+            client = self.vim.eval("fireplace#client()")
+        except Exception:
+            pass
 
-        candidates = parse_list(candidates_str)
+        if client:
+            transport = client['connection']['transport']
+            port = transport['port']
 
-        return [{'word': x} for x in candidates]
+            self.__conn__ = nrepl.connect("nrepl://localhost:{}".format(port))
+            self.__conn__.write({"op": "complete", "symbol": ""})
+            c_result = self.__conn__.read()
+            candidates_map = c_result["completions"]
+
+            candidates = [x['candidate'] for x in candidates_map]
+
+            return [{'word': x} for x in candidates]
+        else:
+            return []
