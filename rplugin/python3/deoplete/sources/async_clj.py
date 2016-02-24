@@ -24,6 +24,8 @@ class Source(Base):
         Base.__init__(self, vim)
         self.name = 'async_clj'
         self.mark = 'CLJ'
+        self.min_pattern_length = 0
+        self.rank = 200
 
     def gather_candidates(self, context):
         client = False
@@ -36,7 +38,6 @@ class Source(Base):
         if client:
             transport = client['connection']['transport']
             ns = self.vim.eval("fireplace#ns()")
-
 
             self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport['host'], transport['port']))
             self.__conn__.write({"op": "complete", "symbol": context['complete_str'], "ns": ns})
