@@ -32,17 +32,19 @@ class Source(Base):
         except Exception:
             pass
 
+        r = []
         if client:
             transport = client['connection']['transport']
-            port = transport['port']
+            ns = self.vim.eval("fireplace#ns()")
 
-            self.__conn__ = nrepl.connect("nrepl://localhost:{}".format(port))
-            self.__conn__.write({"op": "complete", "symbol": ""})
+
+            self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport['host'], transport['port']))
+            self.__conn__.write({"op": "complete", "symbol": context['complete_str'], "ns": ns})
             c_result = self.__conn__.read()
             candidates_map = c_result["completions"]
 
             candidates = [x['candidate'] for x in candidates_map]
 
-            return [{'word': x} for x in candidates]
-        else:
-            return []
+            r = [{'word': x} for x in candidates]
+
+        return r
