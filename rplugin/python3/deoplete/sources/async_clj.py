@@ -46,6 +46,7 @@ class Source(Base):
         Base.__init__(self, vim)
         self.name = "async_clj"
         self.mark = "CLJ"
+        self.filetypes = ['clojure']
         self.min_pattern_length = 0
         self.rank = 200
 
