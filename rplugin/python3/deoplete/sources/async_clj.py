@@ -47,7 +47,6 @@ class Source(Base):
         self.name = "async_clj"
         self.mark = "CLJ"
         self.filetypes = ['clojure']
-        self.min_pattern_length = 0
         self.rank = 200
 
     def gather_candidates(self, context):
