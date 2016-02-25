@@ -8,16 +8,38 @@ from .base import Base
 # from nrepl_python_client import nrepl
 import nrepl
 
-def parse_list(l_s):
-    """
-    Parses a clojure list in the form '("foo" "bar" "baz")' into
-    a Python array, like ["foo", "bar", "baz"]. This function is
-    very crude.
-    """
-    return l_s[1:-1].replace('"', "").split(" ")
 
 def debug_msg(vim, msg):
     vim.current.buffer.append("{}".format(msg))
+
+
+short_types = {
+    "function": "f",
+    "macro": "m",
+    "var": "v",
+    "special-form": "s",
+    "class": "c",
+    "keyword": "k",
+    "local": "l",
+    "namespace": "n",
+    "field": "i",
+    "method": "f",
+    "static-field": "i",
+    "static-method": "f",
+    "resource": "r"
+}
+
+
+def candidate(val):
+    arglists = val.get("arglists")
+    type = val.get("type")
+    return {
+        "word": val.get("candidate"),
+        "kind": short_types.get(type, type),
+        "info": val.get("doc"),
+        "menu": " ".join(arglists) if arglists else ""
+    }
+
 
 class Source(Base):
     def __init__(self, vim):
@@ -34,18 +56,21 @@ class Source(Base):
         except Exception:
             pass
 
-        r = []
         if client:
             transport = client["connection"]["transport"]
             ns = self.vim.eval("fireplace#ns()")
 
-            self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport["host"], transport["port"]))
-            self.__conn__.write({"op": "complete", "symbol": context["complete_str"], "ns": ns})
-            c_result = self.__conn__.read()
-            candidates_map = c_result["completions"]
+            # FIXME: Connection is not reused?
+            self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport.get("host"), transport.get("port")))
+            # TODO: context for context aware completions
+            self.__conn__.write({
+                "op": "complete",
+                "symbol": context["complete_str"],
+                "extra-metadata": ["arglists", "doc"],
+                "ns": ns
+            })
+            response = self.__conn__.read()
 
-            candidates = [x["candidate"] for x in candidates_map]
+            return [candidate(x) for x in response.get("completions", [])]
 
-            r = [{"word": x} for x in candidates]
-
-        return r
+        return []
