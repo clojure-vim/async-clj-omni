@@ -36,7 +36,7 @@ def candidate(val):
     return {
         "word": val.get("candidate"),
         "kind": short_types.get(type, type),
-        "info": val.get("doc"),
+        "info": val.get("doc", ""),
         "menu": " ".join(arglists) if arglists else ""
     }
 
