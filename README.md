@@ -31,10 +31,11 @@ comfortable suggesting that change upstream.
 
 1. Why do you include [nrepl-python-client][] via submodule.
 
-   I made the decision that it was more complex to have users try and
-   manage a version of [nrepl-python-client][], than it was for them to
-   "just" have it included. In an ideal world, I'd be able to use
-   virtualenv with the Python/Neovim, but this isn't currently achievable.
+   I made the decision that it was more complex to have users try and manage a
+   version of [nrepl-python-client][], than it was for them to "just" have it
+   included. In an ideal world, I'd be able to use virtualenv with the
+   Python/Neovim, but this isn't currently a realistic expectation for all
+   users to be able to use.
 
 
 [deoplete.nvim]: https://github.com/Shougo/deoplete.nvim
