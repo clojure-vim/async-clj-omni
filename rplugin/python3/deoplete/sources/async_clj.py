@@ -65,7 +65,7 @@ class Source(Base):
             except Exception:
                 pass
 
-            # FIXME: Connection is not reused?
+            # FIXME: Cache connections based on host/port
             self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport.get("host"), transport.get("port")))
             # TODO: context for context aware completions
             self.__conn__.write({
