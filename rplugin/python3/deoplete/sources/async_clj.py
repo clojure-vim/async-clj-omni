@@ -65,8 +65,12 @@ class Source(Base):
             except Exception:
                 pass
 
+            host = transport.get("host")
+            port = transport.get("port")
+
             # FIXME: Cache connections based on host/port
-            self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport.get("host"), transport.get("port")))
+            conn = nrepl.connect("nrepl://{}:{}".format(host, port))
+            # TODO: context for context aware completions
             # TODO: context for context aware completions
             self.__conn__.write({
                 "op": "complete",
@@ -74,7 +78,7 @@ class Source(Base):
                 "extra-metadata": ["arglists", "doc"],
                 "ns": ns
             })
-            response = self.__conn__.read()
+            response = conn.read()
 
             return [candidate(x) for x in response.get("completions", [])]
 
