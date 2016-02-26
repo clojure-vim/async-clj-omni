@@ -58,7 +58,12 @@ class Source(Base):
 
         if client:
             transport = client.get("connection", {}).get("transport")
-            ns = self.vim.eval("fireplace#ns()")
+            ns = ""
+
+            try:
+                ns = self.vim.eval("fireplace#ns()")
+            except Exception:
+                pass
 
             # FIXME: Connection is not reused?
             self.__conn__ = nrepl.connect("nrepl://{}:{}".format(transport.get("host"), transport.get("port")))
