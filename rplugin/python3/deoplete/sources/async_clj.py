@@ -57,7 +57,7 @@ class Source(Base):
             pass
 
         if client:
-            transport = client["connection"]["transport"]
+            transport = client.get("connection", {}).get("transport")
             ns = self.vim.eval("fireplace#ns()")
 
             # FIXME: Connection is not reused?
