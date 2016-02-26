@@ -71,8 +71,7 @@ class Source(Base):
             # FIXME: Cache connections based on host/port
             conn = nrepl.connect("nrepl://{}:{}".format(host, port))
             # TODO: context for context aware completions
-            # TODO: context for context aware completions
-            self.__conn__.write({
+            conn.write({
                 "op": "complete",
                 "symbol": context["complete_str"],
                 "extra-metadata": ["arglists", "doc"],
