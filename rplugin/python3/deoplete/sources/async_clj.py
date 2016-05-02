@@ -58,15 +58,14 @@ class Source(Base):
 
         if client:
             transport = client.get("connection", {}).get("transport")
-            ns = ""
+            if not transport:
+                return []
 
+            ns = ""
             try:
                 ns = self.vim.eval("fireplace#ns()")
             except Exception:
                 pass
-
-            if not transport:
-                return []
 
             host = transport.get("host")
             port = transport.get("port")
