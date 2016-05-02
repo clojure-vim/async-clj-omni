@@ -65,6 +65,9 @@ class Source(Base):
             except Exception:
                 pass
 
+            if not transport:
+                return []
+
             host = transport.get("host")
             port = transport.get("port")
 
