@@ -79,8 +79,12 @@ class Source(Base):
                 "extra-metadata": ["arglists", "doc"],
                 "ns": ns
             })
+
             response = conn.read()
 
-            return [candidate(x) for x in response.get("completions", [])]
+            # Bencode read can return None, e.g. when and empty byte is read
+            # from connection.
+            if response:
+                return [candidate(x) for x in response.get("completions", [])]
 
         return []
