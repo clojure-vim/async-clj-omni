@@ -28,6 +28,25 @@ let g:deoplete#keyword_patterns.clojure = '[\w!$%&*+/:<=>?@\^_~\-\.]*'
 As I improve them, they may be PR'd into deoplete.vim, but I'm not yet
 comfortable suggesting that change upstream.
 
+## Developing
+
+A few snippets and tidbits for development:
+
+```vimscript
+:call deoplete#custom#set('async_clj', 'debug_enabled', 1)
+:call deoplete#enable_logging("DEBUG", "/tmp/deopletelog")
+```
+
+Then you can this command to watch debug statements:
+```bash
+$ tail -f /tmp/deopletelog
+```
+
+Debug statements can be made in the source via:
+```python
+self.debug(msg)
+```
+
 ## FAQ
 
 1. Why do you include [nrepl-python-client][] via submodule.
