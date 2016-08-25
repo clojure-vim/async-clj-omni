@@ -4,8 +4,8 @@ import os
 basedir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(basedir, "nrepl_python_client/"))
 
-from .base import Base
-import nrepl
+from .base import Base  # NOQA
+import nrepl  # NOQA
 
 
 def debug_msg(vim, msg):
