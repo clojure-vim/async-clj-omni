@@ -5,7 +5,6 @@ basedir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(basedir, "nrepl_python_client/"))
 
 from .base import Base
-# from nrepl_python_client import nrepl
 import nrepl
 
 
