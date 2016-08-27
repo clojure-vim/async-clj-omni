@@ -111,17 +111,21 @@ class Source(Base):
 
             # TODO: context for context aware completions
             self.debug("Sending completion op")
-            wc.send({
-                "id": msgid,
-                "op": "complete",
-                "session": connection.get('session'),
-                "symbol": context["complete_str"],
-                "extra-metadata": ["arglists", "doc"],
-                "ns": ns
-            })
+            try:
+                wc.send({
+                    "id": msgid,
+                    "op": "complete",
+                    "session": connection.get('session'),
+                    "symbol": context["complete_str"],
+                    "extra-metadata": ["arglists", "doc"],
+                    "ns": ns
+                })
+            except BrokenPipeError:
+                self.debug("Connection died. Removing the connection.")
+                self.__conns.pop(conn_string, None)
 
             self.debug("Waiting for completion")
-            completion_event.wait(timeout=0.5)
+            completion_event.wait(0.5)
             self.debug("Completion event is done!")
             wc.unwatch(watcher_key)
             # Bencode read can return None, e.g. when and empty byte is read
