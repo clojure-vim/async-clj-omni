@@ -1,3 +1,5 @@
+import uuid
+import threading
 # Adds a git submodule to the import path
 import sys
 import os
@@ -6,10 +8,6 @@ sys.path.append(os.path.join(basedir, "nrepl_python_client/"))
 
 from .base import Base  # NOQA
 import nrepl  # NOQA
-
-
-def debug_msg(vim, msg):
-    vim.current.buffer.append("{}".format(msg))
 
 
 short_types = {
@@ -40,6 +38,12 @@ def candidate(val):
     }
 
 
+def completion_callback(event):
+    def handlecompletion(msg, wc, key):
+        pass
+    return handlecompletion
+
+
 class Source(Base):
     def __init__(self, vim):
         Base.__init__(self, vim)
@@ -47,6 +51,7 @@ class Source(Base):
         self.mark = "CLJ"
         self.filetypes = ['clojure']
         self.rank = 200
+        self.__conns = {}
 
     def gather_candidates(self, context):
         client = False
@@ -56,7 +61,8 @@ class Source(Base):
             pass
 
         if client:
-            transport = client.get("connection", {}).get("transport")
+            connection = client.get("connection", {})
+            transport = connection.get("transport")
             if not transport:
                 return []
 
@@ -69,18 +75,55 @@ class Source(Base):
             host = transport.get("host")
             port = transport.get("port")
 
-            # FIXME: Cache connections based on host/port
-            conn = nrepl.connect("nrepl://{}:{}".format(host, port))
+            conn_string = "nrepl://{}:{}".format(host, port)
+
+            if conn_string not in self.__conns:
+                conn = nrepl.connect(conn_string)
+
+                def global_watch(cmsg, cwc, ckey):
+                    self.debug("Received message for {}".format(conn_string))
+                    self.debug(cmsg)
+
+                wc = nrepl.WatchableConnection(conn)
+                self.__conns[conn_string] = wc
+                wc.watch("global_watch", {}, global_watch)
+
+            wc = self.__conns.get(conn_string)
+            self.debug(self.__conns)
+
+            # Should be unique for EVERY message
+            msgid = uuid.uuid4().hex
+
+            # Perform completion
+            completion_event = threading.Event()
+            response = None
+
+            def completion_callback(cmsg, cwc, ckey):
+                nonlocal response
+                response = cmsg
+                completion_event.set()
+
+            self.debug("Adding completion watch")
+            watcher_key = "{}-completion".format(msgid),
+            wc.watch(watcher_key,
+                     {"id": msgid},
+                     completion_callback)
+
             # TODO: context for context aware completions
-            conn.write({
+            self.debug("Sending completion op")
+            wc.send({
+                "id": msgid,
                 "op": "complete",
+                "session": connection.get('session'),
                 "symbol": context["complete_str"],
                 "extra-metadata": ["arglists", "doc"],
                 "ns": ns
             })
 
-            response = conn.read()
-
+            self.debug("Waiting for completion")
+            completion_event.wait(timeout=0.5)
+            self.debug("Completion event is done!")
+            wc.unwatch(watcher_key)
             # Bencode read can return None, e.g. when and empty byte is read
             # from connection.
             if response:
