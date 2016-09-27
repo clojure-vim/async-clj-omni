@@ -15,7 +15,7 @@ and sync them here. Then just include with your favourite plugin manager,
 mine is [vim-plug][]
 
 ```vim
-Plug 'SevereOverfl0w/vim-clj-async'
+Plug 'clojure-vim/async-clj-omni'
 ```
 
 You also need to include the following lines in your init.vim:
