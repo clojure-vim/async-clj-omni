@@ -1,3 +1,6 @@
 [submodule "rplugin/python3/deoplete/sources/nrepl-python-client"]
 	path = rplugin/python3/deoplete/sources/nrepl_python_client
 	url = https://github.com/cemerick/nrepl-python-client.git
+[submodule "rplugin/python3/deoplete/sources/vim_nrepl_python_client"]
+	path = rplugin/python3/deoplete/sources/vim_nrepl_python_client
+	url = https://github.com/clojure-vim/nrepl-python-client.git
