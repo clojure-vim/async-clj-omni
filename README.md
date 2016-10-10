@@ -59,5 +59,5 @@ self.debug(msg)
 
 
 [deoplete.nvim]: https://github.com/Shougo/deoplete.nvim
-[nrepl-python-client]: https://github.com/cemerick/nrepl-python-client
+[nrepl-python-client]: https://github.com/clojure-vim/nrepl-python-client
 [vim-plug]: https://github.com/junegunn/vim-plug
