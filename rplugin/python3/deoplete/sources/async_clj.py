@@ -4,7 +4,7 @@ import threading
 import sys
 import os
 basedir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(basedir, "nrepl_python_client/"))
+sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
 
 from .base import Base  # NOQA
 import nrepl  # NOQA
@@ -122,6 +122,7 @@ class Source(Base):
                 })
             except BrokenPipeError:
                 self.debug("Connection died. Removing the connection.")
+                wc.close() # Try and cancel the hanging connection
                 self.__conns.pop(conn_string, None)
 
             self.debug("Waiting for completion")
