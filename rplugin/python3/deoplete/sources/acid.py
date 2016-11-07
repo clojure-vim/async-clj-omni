@@ -1,0 +1,125 @@
+import uuid
+import threading
+# Adds a git submodule to the import path
+import sys
+import os
+basedir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
+sys.path.append(os.path.join(basedir, "../../acid"))
+
+from acid.nvim import localhost, get_acid_ns
+from acid.session import SessionHandler, send
+from .base import Base  # NOQA
+import nrepl  # NOQA
+
+
+short_types = {
+    "function": "f",
+    "macro": "m",
+    "var": "v",
+    "special-form": "s",
+    "class": "c",
+    "keyword": "k",
+    "local": "l",
+    "namespace": "n",
+    "field": "i",
+    "method": "f",
+    "static-field": "i",
+    "static-method": "f",
+    "resource": "r"
+}
+
+
+def candidate(val):
+    arglists = val.get("arglists")
+    type = val.get("type")
+    return {
+        "word": val.get("candidate"),
+        "kind": short_types.get(type, type),
+        "info": val.get("doc", ""),
+        "menu": " ".join(arglists) if arglists else ""
+    }
+
+
+def completion_callback(event):
+    def handlecompletion(msg, wc, key):
+        pass
+    return handlecompletion
+
+def async_send(wc, payload):
+    def clone_handler(msg, wc, key):
+        wc.unwatch(key)
+
+        payload['session'] = msg['new-session']
+        wc.send(payload)
+
+    wc.watch('dyn-session', {'new-session': None}, clone_handler)
+    wc.send({'op': 'clone'})
+
+class Source(Base):
+    def __init__(self, vim):
+        Base.__init__(self, vim)
+        self.name = "acid"
+        self.mark = "[acid]"
+        self.filetypes = ['clojure']
+        self.rank = 200
+        self.__conns = {}
+
+    def on_init(self, context):
+        self.acid_sessions = SessionHandler()
+
+    def gather_candidates(self, context):
+        address = localhost(self.vim)
+        url = "nrepl://{}:{}".format(*address)
+        ns = get_acid_ns(self.vim)
+        wc = self.acid_sessions.get_or_create(url)
+
+        def global_watch(cmsg, cwc, ckey):
+            self.debug("Received message for {}".format(url))
+            self.debug(cmsg)
+
+        wc.watch('global_watch', {}, global_watch)
+
+        # Should be unique for EVERY message
+        msgid = uuid.uuid4().hex
+
+        # Perform completion
+        completion_event = threading.Event()
+        response = None
+
+        def completion_callback(cmsg, cwc, ckey):
+            nonlocal response
+            response = cmsg
+            self.debug("Got response {}".format(str(cmsg)))
+            completion_event.set()
+
+        self.debug("Adding completion watch")
+        watcher_key = "{}-completion".format(msgid),
+        wc.watch(watcher_key, {"id": msgid}, completion_callback)
+
+        # TODO: context for context aware completions
+        self.debug("Sending completion op")
+        try:
+            payload = {"id": msgid,
+                       "op": "complete",
+                       "symbol": context["complete_str"],
+                       "extra-metadata": ["arglists", "doc"],
+                       "ns": ns}
+            self.debug('Sending payload {}'.format(str(payload)))
+            async_send(wc, payload)
+        except BrokenPipeError:
+            self.debug("Connection died. Removing the connection.")
+            wc.close() # Try and cancel the hanging connection
+            del self.acid_sessions.sessions[url]
+
+        self.debug("Waiting for completion")
+        completion_event.wait(0.5)
+        self.debug("Completion event is done!")
+        wc.unwatch(watcher_key)
+        # Bencode read can return None, e.g. when and empty byte is read
+        # from connection.
+        if response:
+            return [candidate(x) for x in response.get("completions", [])]
+
+        self.debug('No answer.')
+        return []
