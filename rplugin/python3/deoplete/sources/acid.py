@@ -46,15 +46,6 @@ def completion_callback(event):
         pass
     return handlecompletion
 
-def async_send(wc, payload):
-    def clone_handler(msg, wc, key):
-        wc.unwatch(key)
-
-        payload['session'] = msg['new-session']
-        wc.send(payload)
-
-    wc.watch('dyn-session', {'new-session': None}, clone_handler)
-    wc.send({'op': 'clone'})
 
 class Source(Base):
     def __init__(self, vim):
@@ -67,12 +58,34 @@ class Source(Base):
 
     def on_init(self, context):
         self.acid_sessions = SessionHandler()
+        self.sessions = {}
+
+    def get_wc(self, url):
+        return self.acid_sessions.get_or_create(url)
+
+    def get_session(self, url, wc):
+        if url in self.sessions:
+            return self.sessions[url]
+
+        session_event = threading.Event()
+
+        def clone_handler(msg, wc, key):
+            wc.unwatch(key)
+            self.sessions[url] = msg['new-session']
+            session_event.set()
+
+        wc.watch('dyn-session', {'new-session': None}, clone_handler)
+        wc.send({'op': 'clone'})
+        session_event.wait(0.5)
+
+        return self.sessions[url]
 
     def gather_candidates(self, context):
         address = localhost(self.vim)
         url = "nrepl://{}:{}".format(*address)
+        wc = self.get_wc(url)
+        session = self.get_session(url, wc)
         ns = get_acid_ns(self.vim)
-        wc = self.acid_sessions.get_or_create(url)
 
         def global_watch(cmsg, cwc, ckey):
             self.debug("Received message for {}".format(url))
@@ -103,10 +116,11 @@ class Source(Base):
             payload = {"id": msgid,
                        "op": "complete",
                        "symbol": context["complete_str"],
+                       "session": session,
                        "extra-metadata": ["arglists", "doc"],
                        "ns": ns}
             self.debug('Sending payload {}'.format(str(payload)))
-            async_send(wc, payload)
+            wc.send(payload)
         except BrokenPipeError:
             self.debug("Connection died. Removing the connection.")
             wc.close() # Try and cancel the hanging connection
