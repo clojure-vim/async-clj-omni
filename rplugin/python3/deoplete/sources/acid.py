@@ -82,6 +82,8 @@ class Source(Base):
 
     def gather_candidates(self, context):
         address = localhost(self.vim)
+        if address is None:
+            return []
         url = "nrepl://{}:{}".format(*address)
         wc = self.get_wc(url)
         session = self.get_session(url, wc)
