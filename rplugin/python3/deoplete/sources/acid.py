@@ -7,7 +7,7 @@ basedir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
 sys.path.append(os.path.join(basedir, "../../acid"))
 
-from acid.nvim import localhost, get_acid_ns
+from acid.nvim import localhost, path_to_ns
 from acid.session import SessionHandler, send
 from .base import Base  # NOQA
 import nrepl  # NOQA
@@ -87,7 +87,7 @@ class Source(Base):
         url = "nrepl://{}:{}".format(*address)
         wc = self.get_wc(url)
         session = self.get_session(url, wc)
-        ns = get_acid_ns(self.vim)
+        ns = path_to_ns(self.vim)
 
         def global_watch(cmsg, cwc, ckey):
             self.debug("Received message for {}".format(url))
