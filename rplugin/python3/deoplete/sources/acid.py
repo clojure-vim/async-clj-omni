@@ -7,8 +7,13 @@ basedir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
 sys.path.append(os.path.join(basedir, "../../acid"))
 
-from acid.nvim import localhost, path_to_ns
-from acid.session import SessionHandler, send
+try:
+    from acid.nvim import localhost, path_to_ns
+    from acid.session import SessionHandler, send
+    loaded = True
+except:
+    loaded = False
+
 from .base import Base  # NOQA
 import nrepl  # NOQA
 
@@ -57,7 +62,10 @@ class Source(Base):
         self.__conns = {}
 
     def on_init(self, context):
-        self.acid_sessions = SessionHandler()
+        if loaded:
+            self.acid_sessions = SessionHandler()
+        else:
+            self.vim.call('echom "Acid.nvim not found. Please install it."')
         self.sessions = {}
 
     def get_wc(self, url):
@@ -81,6 +89,9 @@ class Source(Base):
         return self.sessions[url]
 
     def gather_candidates(self, context):
+        if not loaded:
+            return []
+
         address = localhost(self.vim)
         if address is None:
             return []
