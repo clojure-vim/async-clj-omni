@@ -65,7 +65,7 @@ class Source(Base):
         if loaded:
             self.acid_sessions = SessionHandler()
         else:
-            self.vim.command('echomsg "Acid.nvim not found. Please install it."')
+            self.debug('echomsg "Acid.nvim not found. Please install it."')
         self.sessions = {}
 
     def get_wc(self, url):
