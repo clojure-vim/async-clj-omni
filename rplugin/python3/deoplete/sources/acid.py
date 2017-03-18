@@ -1,11 +1,10 @@
-import uuid
 import threading
 # Adds a git submodule to the import path
 import sys
 import os
 basedir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
 sys.path.append(os.path.join(basedir, "../../acid"))
+sys.path.append(os.path.join(basedir, "../../async_clj_omni"))
 
 try:
     from acid.nvim import localhost, path_to_ns
@@ -14,42 +13,22 @@ try:
 except:
     loaded = False
 
+from async_clj_omni.cider import cider_gather  # NOQA
 from .base import Base  # NOQA
-import nrepl  # NOQA
 
 
-short_types = {
-    "function": "f",
-    "macro": "m",
-    "var": "v",
-    "special-form": "s",
-    "class": "c",
-    "keyword": "k",
-    "local": "l",
-    "namespace": "n",
-    "field": "i",
-    "method": "f",
-    "static-field": "i",
-    "static-method": "f",
-    "resource": "r"
-}
+class Acid_nrepl:
+    def __init__(self, wc):
+        self.wc = wc
 
+    def send(self, msg):
+        self.wc.send(msg)
 
-def candidate(val):
-    arglists = val.get("arglists")
-    type = val.get("type")
-    return {
-        "word": val.get("candidate"),
-        "kind": short_types.get(type, type),
-        "info": val.get("doc", ""),
-        "menu": " ".join(arglists) if arglists else ""
-    }
+    def watch(self, name, q, callback):
+        self.wc.watch(name, q, callback)
 
-
-def completion_callback(event):
-    def handlecompletion(msg, wc, key):
-        pass
-    return handlecompletion
+    def unwatch(self, name):
+        self.wc.unwatch(name)
 
 
 class Source(Base):
@@ -106,47 +85,7 @@ class Source(Base):
 
         wc.watch('global_watch', {}, global_watch)
 
-        # Should be unique for EVERY message
-        msgid = uuid.uuid4().hex
-
-        # Perform completion
-        completion_event = threading.Event()
-        response = None
-
-        def completion_callback(cmsg, cwc, ckey):
-            nonlocal response
-            response = cmsg
-            self.debug("Got response {}".format(str(cmsg)))
-            completion_event.set()
-
-        self.debug("Adding completion watch")
-        watcher_key = "{}-completion".format(msgid),
-        wc.watch(watcher_key, {"id": msgid}, completion_callback)
-
-        # TODO: context for context aware completions
-        self.debug("Sending completion op")
-        try:
-            payload = {"id": msgid,
-                       "op": "complete",
-                       "symbol": context["complete_str"],
-                       "session": session,
-                       "extra-metadata": ["arglists", "doc"],
-                       "ns": ns}
-            self.debug('Sending payload {}'.format(str(payload)))
-            wc.send(payload)
-        except BrokenPipeError:
-            self.debug("Connection died. Removing the connection.")
-            wc.close() # Try and cancel the hanging connection
-            del self.acid_sessions.sessions[url]
-
-        self.debug("Waiting for completion")
-        completion_event.wait(0.5)
-        self.debug("Completion event is done!")
-        wc.unwatch(watcher_key)
-        # Bencode read can return None, e.g. when and empty byte is read
-        # from connection.
-        if response:
-            return [candidate(x) for x in response.get("completions", [])]
-
-        self.debug('No answer.')
-        return []
+        return cider_gather(Acid_nrepl(wc),
+                            context["complete_str"],
+                            session,
+                            ns)
