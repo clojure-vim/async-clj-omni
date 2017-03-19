@@ -11,20 +11,6 @@ from .base import Base  # NOQA
 import deoplete.logger
 
 
-class Fireplace_nrepl:
-    def __init__(self, wc):
-        self.wc = wc
-
-    def send(self, msg):
-        self.wc.send(msg)
-
-    def watch(self, name, q, callback):
-        self.wc.watch(name, q, callback)
-
-    def unwatch(self, name):
-        self.wc.unwatch(name)
-
-
 class Source(Base):
     def __init__(self, vim):
         Base.__init__(self, vim)
@@ -52,7 +38,7 @@ class Source(Base):
         wc = self.__connmanager.get_conn(conn_string)
 
         return cider_gather(deoplete.logger.getLogger('fireplace_cider_gather'),
-                            Fireplace_nrepl(wc),
+                            fireplace.Fireplace_nrepl(wc),
                             context["complete_str"],
                             connection.get("session"),
                             ns)

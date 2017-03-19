@@ -43,3 +43,16 @@ class ConnManager:
             wc.watch("global_watch", {}, global_watch)
 
         return self.__conns.get(conn_string)
+
+class Fireplace_nrepl:
+    def __init__(self, wc):
+        self.wc = wc
+
+    def send(self, msg):
+        self.wc.send(msg)
+
+    def watch(self, name, q, callback):
+        self.wc.watch(name, q, callback)
+
+    def unwatch(self, name):
+        self.wc.unwatch(name)
