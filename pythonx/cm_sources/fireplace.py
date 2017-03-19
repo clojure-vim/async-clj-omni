@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
-
-basedir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.normpath(os.path.join(basedir, "../../rplugin/python3/deoplete/sources/vim_nrepl_python_client")))
-from async_clj_omni import fireplace
-
 from cm import register_source, getLogger, Base
 register_source(name='fireplace',
                 abbreviation='🔥',
@@ -14,6 +7,11 @@ register_source(name='fireplace',
                 word_pattern=r'[\w!$%&*+/:<=>?@\^_~\-\.#]+',
                 priority=9)
 
+import sys
+import os
+basedir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.normpath(os.path.join(basedir, "../../rplugin/python3/deoplete/sources/vim_nrepl_python_client")))
+from async_clj_omni import fireplace
 import re
 
 class Source(Base):
