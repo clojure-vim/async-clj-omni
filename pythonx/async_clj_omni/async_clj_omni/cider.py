@@ -2,8 +2,6 @@ import uuid
 import threading
 import logging
 
-root = logging.getLogger('deoplete')
-
 short_types = {
     "function": "f",
     "macro": "m",
@@ -32,14 +30,14 @@ def candidate(val):
     }
 
 
-def cider_gather(nrepl, keyword, session, ns):
+def cider_gather(logger, nrepl, keyword, session, ns):
     # Should be unique for EVERY message
     msgid = uuid.uuid4().hex
 
     completion_event = threading.Event()
     response = None
 
-    root.debug("cider gather been called {}".format(msgid))
+    logger.debug("cider gather been called {}".format(msgid))
 
     def completion_callback(cmsg, cwc, ckey):
         nonlocal response
@@ -50,7 +48,7 @@ def cider_gather(nrepl, keyword, session, ns):
                 {"id": msgid},
                 completion_callback)
 
-    root.debug("cider_gather watching msgid")
+    logger.debug("cider_gather watching msgid")
 
     # TODO: context for context aware completions
     nrepl.send({
@@ -64,8 +62,8 @@ def cider_gather(nrepl, keyword, session, ns):
 
     completion_event.wait(0.5)
 
-    root.debug("finished waiting for completion to happen")
-    root.debug("response truthy? {}".format(bool(response)))
+    logger.debug("finished waiting for completion to happen")
+    logger.debug("response truthy? {}".format(bool(response)))
 
     nrepl.unwatch("{}-completion".format(msgid))
 

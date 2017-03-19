@@ -51,7 +51,8 @@ class Source(Base):
 
         wc = self.__connmanager.get_conn(conn_string)
 
-        return cider_gather(Fireplace_nrepl(wc),
+        return cider_gather(deoplete.logger.getLogger('fireplace_cider_gather'),
+                            Fireplace_nrepl(wc),
                             context["complete_str"],
                             connection.get("session"),
                             ns)
