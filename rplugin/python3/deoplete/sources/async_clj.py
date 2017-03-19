@@ -3,7 +3,7 @@ import sys
 import os
 basedir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
-sys.path.append(os.path.join(basedir, "../../../../pythonx/async_clj_omni"))
+sys.path.append(os.path.join(basedir, "../../../../pythonx/"))
 
 # from async_clj_omni.cider import cider_gather  # NOQA
 from async_clj_omni import fireplace
