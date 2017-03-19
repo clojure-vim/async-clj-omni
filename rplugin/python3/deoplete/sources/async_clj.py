@@ -8,7 +8,6 @@ sys.path.append(os.path.join(basedir, "../../../../pythonx/async_clj_omni"))
 from async_clj_omni.cider import cider_gather  # NOQA
 from async_clj_omni import fireplace
 from .base import Base  # NOQA
-import nrepl  # NOQA
 
 
 class Fireplace_nrepl:
@@ -32,7 +31,8 @@ class Source(Base):
         self.mark = "CLJ"
         self.filetypes = ['clojure']
         self.rank = 200
-        self.__conns = {}
+        # self.__conns = {}
+        self.__connmanager = fireplace.ConnManager()
 
     def gather_candidates(self, context):
         self.debug("Gathering candidates")
@@ -48,19 +48,7 @@ class Source(Base):
 
         conn_string = "nrepl://{}:{}".format(host, port)
 
-        if conn_string not in self.__conns:
-            conn = nrepl.connect(conn_string)
-
-            def global_watch(cmsg, cwc, ckey):
-                self.debug("Received message for {}".format(conn_string))
-                self.debug(cmsg)
-
-            wc = nrepl.WatchableConnection(conn)
-            self.__conns[conn_string] = wc
-            wc.watch("global_watch", {}, global_watch)
-
-        wc = self.__conns.get(conn_string)
-        self.debug(self.__conns)
+        wc = self.__connmanager.get_conn(conn_string)
 
         return cider_gather(Fireplace_nrepl(wc),
                             context["complete_str"],
