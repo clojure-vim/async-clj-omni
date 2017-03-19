@@ -3,9 +3,10 @@ import sys
 import os
 basedir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(basedir, "vim_nrepl_python_client/"))
-sys.path.append(os.path.join(basedir, "../../async_clj_omni"))
+sys.path.append(os.path.join(basedir, "../../../../pythonx/async_clj_omni"))
 
 from async_clj_omni.cider import cider_gather  # NOQA
+from async_clj_omni import fireplace
 from .base import Base  # NOQA
 import nrepl  # NOQA
 
@@ -35,46 +36,33 @@ class Source(Base):
 
     def gather_candidates(self, context):
         self.debug("Gathering candidates")
-        client = False
+
         try:
-            client = self.vim.eval("fireplace#client()")
-        except Exception:
-            pass
+            client, connection, transport, ns = fireplace.gather_conn_info(self.vim)
+        except fireplace.Error:
+            self.exception("Unable to get connection info")
+            return []
 
-        if client:
-            connection = client.get("connection", {})
-            transport = connection.get("transport")
-            if not transport:
-                return []
+        host = transport.get("host")
+        port = transport.get("port")
 
-            ns = ""
-            try:
-                ns = self.vim.eval("fireplace#ns()")
-            except Exception:
-                pass
+        conn_string = "nrepl://{}:{}".format(host, port)
 
-            host = transport.get("host")
-            port = transport.get("port")
+        if conn_string not in self.__conns:
+            conn = nrepl.connect(conn_string)
 
-            conn_string = "nrepl://{}:{}".format(host, port)
+            def global_watch(cmsg, cwc, ckey):
+                self.debug("Received message for {}".format(conn_string))
+                self.debug(cmsg)
 
-            if conn_string not in self.__conns:
-                conn = nrepl.connect(conn_string)
+            wc = nrepl.WatchableConnection(conn)
+            self.__conns[conn_string] = wc
+            wc.watch("global_watch", {}, global_watch)
 
-                def global_watch(cmsg, cwc, ckey):
-                    self.debug("Received message for {}".format(conn_string))
-                    self.debug(cmsg)
+        wc = self.__conns.get(conn_string)
+        self.debug(self.__conns)
 
-                wc = nrepl.WatchableConnection(conn)
-                self.__conns[conn_string] = wc
-                wc.watch("global_watch", {}, global_watch)
-
-            wc = self.__conns.get(conn_string)
-            self.debug(self.__conns)
-
-            return cider_gather(Fireplace_nrepl(wc),
-                                context["complete_str"],
-                                connection.get("session"),
-                                ns)
-
-        return []
+        return cider_gather(Fireplace_nrepl(wc),
+                            context["complete_str"],
+                            connection.get("session"),
+                            ns)
