@@ -1,4 +1,5 @@
-import nrepl  # NOQA
+import nrepl
+from async_clj_omni.cider import cider_gather
 
 class Error(Exception):
     """Base class for exceptions in this module."""
@@ -56,3 +57,31 @@ class Fireplace_nrepl:
 
     def unwatch(self, name):
         self.wc.unwatch(name)
+
+class CiderCompletionManager:
+    def __init__(self, logger, vim):
+        self.__connmanager = ConnManager(logger)
+        self.__logger = logger
+        self.__vim = vim
+
+    def gather_candidates(self, complete_str):
+        self.__logger.debug("Gathering candidates")
+
+        try:
+            client, connection, transport, ns = gather_conn_info(self.__vim)
+        except Error:
+            self.__logger.exception("Unable to get connection info")
+            return []
+
+        host = transport.get("host")
+        port = transport.get("port")
+
+        conn_string = "nrepl://{}:{}".format(host, port)
+
+        wc = self.__connmanager.get_conn(conn_string)
+
+        return cider_gather(self.__logger,
+                            Fireplace_nrepl(wc),
+                            complete_str,
+                            connection.get("session"),
+                            ns)
