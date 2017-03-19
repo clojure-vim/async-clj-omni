@@ -8,6 +8,7 @@ sys.path.append(os.path.join(basedir, "../../../../pythonx/async_clj_omni"))
 from async_clj_omni.cider import cider_gather  # NOQA
 from async_clj_omni import fireplace
 from .base import Base  # NOQA
+import deoplete.logger
 
 
 class Fireplace_nrepl:
@@ -32,7 +33,7 @@ class Source(Base):
         self.filetypes = ['clojure']
         self.rank = 200
         # self.__conns = {}
-        self.__connmanager = fireplace.ConnManager()
+        self.__connmanager = fireplace.ConnManager(deoplete.logger.getLogger('fireplace_conn_manager'))
 
     def gather_candidates(self, context):
         self.debug("Gathering candidates")
