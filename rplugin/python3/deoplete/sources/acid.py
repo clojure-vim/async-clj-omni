@@ -85,7 +85,8 @@ class Source(Base):
 
         wc.watch('global_watch', {}, global_watch)
 
-        return cider_gather(Acid_nrepl(wc),
+        return cider_gather(self,
+                            Acid_nrepl(wc),
                             context["complete_str"],
                             session,
                             ns)
