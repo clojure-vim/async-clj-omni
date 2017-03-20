@@ -7,7 +7,7 @@ sys.path.append(os.path.join(basedir, "../../acid"))
 sys.path.append(os.path.join(basedir, "../../../../pythonx/"))
 
 try:
-    from acid.nvim import localhost, path_to_ns
+    from acid.nvim import formatted_localhost_address, path_to_ns
     from acid.session import SessionHandler, send
     loaded = True
 except:
@@ -71,10 +71,11 @@ class Source(Base):
         if not loaded:
             return []
 
-        address = localhost(self.vim)
-        if address is None:
+        url  = formatted_localhost_address(self.vim)
+
+        if url is None:
             return []
-        url = "nrepl://{}:{}".format(*address)
+
         wc = self.get_wc(url)
         session = self.get_session(url, wc)
         ns = path_to_ns(self.vim)
