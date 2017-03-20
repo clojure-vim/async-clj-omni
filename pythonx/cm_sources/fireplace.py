@@ -24,4 +24,4 @@ class Source(Base):
         # matches = ['foo_bar','foo_baz', 'req$\'uire']
         getLogger(__name__).debug('Running a refresh…')
         matches = self._cider_completion_manager.gather_candidates(re.search(info['word_pattern'], ctx['typed']).group(0))
-        self._nvim.call('cm#complete', info['name'], ctx, ctx['startcol'], matches, async=True)
+        self._nvim.call('cm#complete', info['name'], ctx, ctx['startcol'], matches, 1, async=True)
