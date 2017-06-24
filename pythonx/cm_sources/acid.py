@@ -5,6 +5,7 @@ register_source(name='acid',
                 abbreviation='acid',
                 scopes=['clojure'],
                 word_pattern=r'[\w!$%&*+/:<=>?@\^_~\-\.#]+',
+                cm_refresh_patterns=[r'/$'],
                 priority=9)
 
 import os
@@ -24,6 +25,4 @@ class Source(Base):
     def cm_refresh(self,info,ctx):
         getLogger(__name__).debug('Running a refresh…')
         matches = self._acid_manager.gather_candidates(ctx['base'])
-        # matches = ['foo', 'foobard', 'bazzer']
-        getLogger(__name__).debug('Got matches', matches)
-        self._nvim.call('cm#complete', info['name'], ctx, ctx['startcol'], matches, 1, async=True)
+        self._nvim.call('cm#complete', info['name'], ctx, ctx['startcol'], matches, async=True)

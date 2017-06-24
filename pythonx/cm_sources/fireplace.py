@@ -5,6 +5,7 @@ register_source(name='fireplace',
                 abbreviation='🔥',
                 scopes=['clojure'],
                 word_pattern=r'[\w!$%&*+/:<=>?@\^_~\-\.#]+',
+                cm_refresh_patterns=[r'/$'],
                 priority=9)
 
 import sys
@@ -23,4 +24,4 @@ class Source(Base):
     def cm_refresh(self,info,ctx):
         getLogger(__name__).debug('Running a refresh…')
         matches = self._cider_completion_manager.gather_candidates(ctx['base'])
-        self._nvim.call('cm#complete', info['name'], ctx, ctx['startcol'], matches, 1, async=True)
+        self._nvim.call('cm#complete', info['name'], ctx, ctx['startcol'], matches, False, async=True)
