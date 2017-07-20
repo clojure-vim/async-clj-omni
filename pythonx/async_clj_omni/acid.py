@@ -1,7 +1,7 @@
 import threading
 from async_clj_omni.cider import cider_gather  # NOQA
 try:
-    from acid.nvim import localhost, path_to_ns
+    from acid.nvim import localhost, get_acid_ns
     from acid.session import SessionHandler, send
     loaded = True
 except:
@@ -65,7 +65,7 @@ class AcidManager:
         url = "nrepl://{}:{}".format(*address)
         wc = self.get_wc(url)
         session = self.get_session(url, wc)
-        ns = path_to_ns(self._vim)
+        ns = get_acid_ns(self._vim)
 
         def global_watch(cmsg, cwc, ckey):
             self._logger.debug("Received message for {}".format(url))
