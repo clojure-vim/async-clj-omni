@@ -5,7 +5,7 @@ register_source(name='acid',
                 abbreviation='acid',
                 scopes=['clojure'],
                 word_pattern=r'[\w!$%&*+/:<=>?@\^_~\-\.#]+',
-                cm_refresh_patterns=[r'/$'],
+                cm_refresh_patterns=[r'/'],
                 priority=9)
 
 import os
