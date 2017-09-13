@@ -29,8 +29,10 @@ def candidate(val):
         "menu": " ".join(arglists) if arglists else ""
     }
 
+def rethrow(e):
+    raise e
 
-def cider_gather(logger, nrepl, keyword, session, ns):
+def cider_gather(logger, nrepl, keyword, session, ns, on_error=rethrow):
     # Should be unique for EVERY message
     msgid = uuid.uuid4().hex
 
@@ -50,15 +52,18 @@ def cider_gather(logger, nrepl, keyword, session, ns):
 
     logger.debug("cider_gather watching msgid")
 
-    # TODO: context for context aware completions
-    nrepl.send({
-        "id": msgid,
-        "op": "complete",
-        "session": session,
-        "symbol": keyword,
-        "extra-metadata": ["arglists", "doc"],
-        "ns": ns
-    })
+    try:
+        # TODO: context for context aware completions
+        nrepl.send({
+            "id": msgid,
+            "op": "complete",
+            "session": session,
+            "symbol": keyword,
+            "extra-metadata": ["arglists", "doc"],
+            "ns": ns
+        })
+    except BrokenPipeError as e:
+        on_error(e)
 
     completion_event.wait(0.5)
 

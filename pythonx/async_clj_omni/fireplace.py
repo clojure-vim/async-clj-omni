@@ -45,6 +45,13 @@ class ConnManager:
 
         return self.__conns.get(conn_string)
 
+    def remove_conn(self, conn_string):
+        self.logger.debug(
+            ("Connection to {} died. "
+             "Removing the connection.").format(conn_string)
+        )
+        self.__conns.pop(conn_string, None)
+
 class Fireplace_nrepl:
     def __init__(self, wc):
         self.wc = wc
@@ -80,8 +87,12 @@ class CiderCompletionManager:
 
         wc = self.__connmanager.get_conn(conn_string)
 
+        def on_error(e):
+            self.__connmanager.remove_conn(conn_string)
+
         return cider_gather(self.__logger,
                             Fireplace_nrepl(wc),
                             complete_str,
                             connection.get("session"),
-                            ns)
+                            ns,
+                            on_error)
