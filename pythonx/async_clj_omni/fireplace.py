@@ -1,5 +1,6 @@
 import nrepl
 from async_clj_omni.cider import cider_gather
+from neovim.api.nvim import NvimError
 
 class Error(Exception):
     """Base class for exceptions in this module."""
@@ -8,8 +9,15 @@ class Error(Exception):
 def gather_conn_info(vim):
     try:
         client = vim.eval("fireplace#client()")
-    except Exception:
-        raise Error
+    # If Fireplace complains that there is no REPL connection, silently fail
+    # instead of throwing an error in the user's face.
+    except NvimError as e:
+        if str(e) == "b'Fireplace: :Connect to a REPL or install classpath.vim'":
+            client = None
+        else:
+            raise Error(str(e))
+    except Exception as e:
+        raise Error(str(e))
 
     if client:
         connection = client.get("connection", {})
@@ -76,8 +84,8 @@ class CiderCompletionManager:
 
         try:
             client, connection, transport, ns = gather_conn_info(self.__vim)
-        except Error:
-            self.__logger.exception("Unable to get connection info")
+        except Error as e:
+            self.__logger.exception("Unable to get connection info: " + str(e))
             return []
 
         host = transport.get("host")
