@@ -77,7 +77,7 @@ class CiderCompletionManager:
         try:
             client, connection, transport, ns = gather_conn_info(self.__vim)
         except Error:
-            self.__logger.exception("Unable to get connection info")
+            self.__logger.debug("Unable to get connection info")
             return []
 
         host = transport.get("host")
