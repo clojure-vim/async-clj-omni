@@ -13,7 +13,7 @@ def gather_conn_info(vim):
 
     if client:
         connection = client.get("connection", {})
-        transport = connection.get("transport")
+        transport = connection.get("transport", client.get("transport"))
 
         if not transport:
             raise Error
