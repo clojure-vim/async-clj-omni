@@ -34,7 +34,7 @@ function! s:completor(opt, ctx)
 
   let l:startcol = l:col - l:kwlen
 
-  call fireplace#message({'op': 'complete', 'symbol': l:kw, 'ns': fireplace#ns()},
+  call fireplace#message({'op': 'complete', 'symbol': l:kw, 'ns': fireplace#ns(), 'extra-metadata': ['arglists', 'doc']},
 			  \ { msg -> has_key(msg, 'completions')
 			  \ && 
 			  \ asyncomplete#complete(a:opt['name'], a:ctx, l:startcol, map(msg['completions'], { _, val -> s:candidate(val) }), 1)})
