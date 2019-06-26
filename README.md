@@ -43,6 +43,19 @@ comfortable suggesting that change upstream.
 
 That's it. It should "just" work, whether you're using Acid or Fireplace.
 
+### asyncomplete.vim
+
+
+Registration:
+
+```
+au User asyncomplete_setup call asyncomplete#register_source({
+    \ 'name': 'fireplace',
+    \ 'whitelist': ['clojure'],
+    \ 'completor': function('async_clj_omni#sources#complete'),
+    \ })
+```
+
 ## Developing
 
 ### Deoplete
