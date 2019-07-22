@@ -50,7 +50,7 @@ Registration:
 
 ```
 au User asyncomplete_setup call asyncomplete#register_source({
-    \ 'name': 'fireplace',
+    \ 'name': 'async_clj_omni',
     \ 'whitelist': ['clojure'],
     \ 'completor': function('async_clj_omni#sources#complete'),
     \ })
