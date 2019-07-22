@@ -1,31 +1,4 @@
-let s:short_types = {
-      \ 'function': 'f',
-      \ 'macro': 'm',
-      \ 'var': 'v',
-      \ 'special-form': 's',
-      \ 'class': 'c',
-      \ 'keyword': 'k',
-      \ 'local': 'l',
-      \ 'namespace': 'n',
-      \ 'field': 'i',
-      \ 'method': 'f',
-      \ 'static-field': 'i',
-      \ 'static-method': 'f',
-      \ 'resource': 'r'
-      \ }
-
-function! s:candidate(val) abort
-  let type = get(a:val, 'type', '')
-  let arglists = get(a:val, 'arglists', [])
-  return {
-        \ 'word': get(a:val, 'candidate'),
-        \ 'kind': get(s:short_types, type, type),
-        \ 'info': get(a:val, 'doc', ''),
-        \ 'menu': empty(arglists) ? '' : '(' . join(arglists, ' ') . ')'
-        \ }
-endfunction
-
-function! s:completor(opt, ctx)
+function! s:completor(opt, ctx) abort
   let l:col = a:ctx['col']
   let l:typed = a:ctx['typed']
 
@@ -34,10 +7,9 @@ function! s:completor(opt, ctx)
 
   let l:startcol = l:col - l:kwlen
 
-  call fireplace#message({'op': 'complete', 'symbol': l:kw, 'ns': fireplace#ns(), 'extra-metadata': ['arglists', 'doc']},
-			  \ { msg -> has_key(msg, 'completions')
-			  \ && 
-			  \ asyncomplete#complete(a:opt['name'], a:ctx, l:startcol, map(msg['completions'], { _, val -> s:candidate(val) }), 1)})
+  call fireplace#omnicomplete({candidates ->
+        \ asyncomplete#complete(a:opt['name'], a:ctx, l:startcol, candidates, 1)},
+        \ l:kw)
 endfunction
 
 function! async_clj_omni#sources#complete(opt, ctx)
