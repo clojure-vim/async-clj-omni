@@ -1,7 +1,10 @@
 # clj-async.nvim
 
-Provides async clojure completion through [deoplete.nvim][] or [ncm][] and
-[nrepl-python-client][].
+Provides async clojure completion for:
+
+* [ncm2][]
+* [asyncomplete.vim][]
+* [coc.nvim][]
 
 Trying to use Fireplace's omnicompletion with auto-complete is painfully
 slow at times, making typing blocked. Using this module will be faster as
@@ -32,18 +35,15 @@ let g:deoplete#keyword_patterns.clojure = '[\w!$%&*+/:<=>?@\^_~\-\.#]*'
 As I improve them, they may be PR'd into deoplete.vim, but I'm not yet
 comfortable suggesting that change upstream.
 
-### Nvim Completion Manager
+### Nvim Completion Manager 2
 
-1. Follow the install instructions for [ncm][].
+1. Follow the install instructions for [ncm2][].
 2. Add this plugin using your favourite plugin manager,
    ```vim
    Plug 'clojure-vim/async-clj-omni'
    ```
 
-That's it. It should "just" work, whether you're using Acid or Fireplace.
-
 ### asyncomplete.vim
-
 
 Registration:
 
@@ -54,6 +54,14 @@ au User asyncomplete_setup call asyncomplete#register_source({
     \ 'completor': function('async_clj_omni#sources#complete'),
     \ })
 ```
+
+### coc.nvim
+
+1. Follow the install instructions for [coc.nvim][].
+2. Add this plugin using your favourite plugin manager,
+   ```vim
+   Plug 'clojure-vim/async-clj-omni'
+   ```
 
 ## Developing
 
@@ -96,3 +104,6 @@ NVIM_PYTHON_LOG_FILE=logfile NVIM_PYTHON_LOG_LEVEL=DEBUG nvim
 [nrepl-python-client]: https://github.com/clojure-vim/nrepl-python-client
 [vim-plug]: https://github.com/junegunn/vim-plug
 [ncm]: https://github.com/roxma/nvim-completion-manager
+[ncm2]: https://github.com/ncm2/ncm2
+[coc.nvim]: https://github.com/neoclide/coc.nvim
+[asyncomplete.vim]: https://github.com/prabirshrestha/asyncomplete.vim
