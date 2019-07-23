@@ -1,4 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/SevereOverfl0w/async-clj-omni.png?label=ready&title=Ready)](https://waffle.io/SevereOverfl0w/async-clj-omni)
 # clj-async.nvim
 
 Provides async clojure completion through [deoplete.nvim][] or [ncm][] and
