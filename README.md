@@ -2,6 +2,7 @@
 
 Provides async clojure completion for:
 
+* [deoplete.nvim][]
 * [ncm2][]
 * [asyncomplete.vim][]
 * [coc.nvim][]
@@ -25,15 +26,11 @@ your favourite plugin manager, mine is [vim-plug][]
 Plug 'clojure-vim/async-clj-omni'
 ```
 
-You also need to include the following lines in your init.vim:
+You also need to include the following line in your init.vim:
 
 ```vim
-let g:deoplete#keyword_patterns = {}
-let g:deoplete#keyword_patterns.clojure = '[\w!$%&*+/:<=>?@\^_~\-\.#]*'
+call deoplete#custom#option('keyword_patterns', {'clojure': '[\w!$%&*+/:<=>?@\^_~\-\.#]*'})
 ```
-
-As I improve them, they may be PR'd into deoplete.vim, but I'm not yet
-comfortable suggesting that change upstream.
 
 ### Nvim Completion Manager 2
 
