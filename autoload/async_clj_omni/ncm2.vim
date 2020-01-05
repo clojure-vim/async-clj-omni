@@ -17,7 +17,7 @@ function! async_clj_omni#ncm2#init()
         \ 'priority': 9,
         \ 'word_pattern': '[\w!$%&*+/:<=>?@\^_~\-\.#]+',
         \ 'complete_pattern': ['\.', '/'],
-        \ 'complete_length': 0,
+        \ 'complete_length': 2,
         \ 'matcher': 'none',
         \ 'scope': ['clojure'],
         \ 'on_complete': function('<SID>on_complete'),
