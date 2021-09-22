@@ -6,6 +6,7 @@ Provides async clojure completion for:
 * [ncm2][]
 * [asyncomplete.vim][]
 * [coc.nvim][]
+* [nvim-cmp][]
 
 Trying to use Fireplace's omnicompletion with auto-complete is painfully
 slow at times, making typing blocked. Using this module will be faster as
@@ -60,6 +61,19 @@ au User asyncomplete_setup call asyncomplete#register_source({
    Plug 'clojure-vim/async-clj-omni'
    ```
 
+### nvim-cmp
+
+1. Follow the install instructions for [nvim-cmp][].
+2. Add `{ name = 'async_clj_omni' }`, a complete example:
+   ```lua
+   cmp.setup({
+     sources = {
+       { name = 'async_clj_omni' },
+     }
+   })
+   ```
+3. Add `call async_clj_omni#cmp#register()` somewhere in your init.vim.
+
 ## Developing
 
 ### Deoplete
@@ -104,3 +118,4 @@ NVIM_PYTHON_LOG_FILE=logfile NVIM_PYTHON_LOG_LEVEL=DEBUG nvim
 [ncm2]: https://github.com/ncm2/ncm2
 [coc.nvim]: https://github.com/neoclide/coc.nvim
 [asyncomplete.vim]: https://github.com/prabirshrestha/asyncomplete.vim
+[nvim-cmp]: https://github.com/hrsh7th/nvim-cmp
