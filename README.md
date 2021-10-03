@@ -72,7 +72,6 @@ au User asyncomplete_setup call asyncomplete#register_source({
      }
    })
    ```
-3. Add `call async_clj_omni#cmp#register()` somewhere in your init.vim.
 
 ## Developing
 

@@ -1,5 +1,4 @@
-" cmp isn't guaranteed to be loaded before this file runs, which is why we
-" leave the option to manually register.
-if exists('*cmp#register_source')
-  call async_clj_omni#cmp#register()
-endif
+augroup async_clj_omni_plugins
+  autocmd!
+  autocmd User cmp#ready call async_clj_omni#cmp#register()
+augroup END
